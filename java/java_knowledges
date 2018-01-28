@@ -1,0 +1,282 @@
+1. 访问控制修饰符
+默认的，也称为 default，在同一包内可见，不使用任何修饰符。
+私有的，以 private 修饰符指定，在同一类内可见。
+共有的，以 public 修饰符指定，对所有类可见。
+受保护的，以 protected 修饰符指定，对同一包内的类和所有子类可见。
+访问控制
+修饰符	当前类	同一包内	子孙类	其他包
+public	Y	Y	Y	Y
+protected	Y	Y	Y	N
+default	Y	Y	N	N
+private	Y	N	N	N
+非访问修饰符
+为了实现一些其他的功能，Java也提供了许多非访问修饰符。
+
+static修饰符，用来创建类方法和类变量。
+Final修饰符，用来修饰类、方法和变量，final修饰的类不能够被继承，修饰的方法不能被继承类重新定义，修饰的变量为常量，是不可修改的。
+Abstract修饰符，用来创建抽象类和抽象方法。
+Synchronized和volatile修饰符，主要用于线程的编程。
+2.运算符
+条件运算符（?:）
+variable x = (expression) ? value if true : value if false
+代码示例
+
+public class Test {
+   public static void main(String args[]){
+      int a , b;   
+      a = 10;    
+b = (a == 1) ? 20: 30;    
+System.out.println( "Value of b is : " +  b );
+      b = (a == 10) ? 20: 30;    
+     System.out.println( "Value of b is : " + b );
+   }
+}
+运行结果：
+
+Value of b is : 30
+Value of b is : 20
+instanceOf 运算符
+该运算符用于操作对象实例，检查该对象是否是一个特定类型（类类型或接口类型）。
+instanceof运算符使用格式如下：
+
+( Object reference variable ) instanceOf  (class/interface type)
+如果运算符左侧变量所指的对象，是操作符右侧类或接口(class/interface)的一个对象，那么结果为真。
+下面是一个例子：
+
+String name = 'James';
+boolean result = name instanceOf String; // 由于name是String类型，所以返回真
+如果被比较的对象兼容于右侧类型,该运算符仍然返回true。
+看下面的例子：
+
+class Vehicle {}
+
+public class Car extends Vehicle {
+   public static void main(String args[]){
+      Vehicle a = new Car();
+      boolean result =  a instanceof Car;
+      System.out.println( result);
+   }
+}
+3.String类
+String类初始化后是不可变的(immutable)
+这一说又要说很多，大家只要知道String的实例一旦生成就不会再改变了，比如说：String str=”kv”+”ill”+” “+”ans”; 就是有4个字符串常量，首先”kv”和”ill”生成了”kvill”存在内存中，然后”kvill”又和” ” 生成 “kvill “存在内存中，最后又和生成了”kvill ans”;并把这个字符串的地址赋给了str,就是因为String的”不可变”产生了很多临时变量，这也就是为什么建议用StringBuffer的原 因了，因为StringBuffer是可改变的。
+
+　　下面是一些String相关的常见问题：
+
+　
+
+　//String中的final用法和理解 
+　　final StringBuffer a = new StringBuffer("111"); 
+　　final StringBuffer b = new StringBuffer("222"); 
+　　a=b;//此句编译不通过  final StringBuffer a = new StringBuffer("111"); 
+　　a.append("222");// 编译通过 
+　　可见，final只对引用的"值"(即内存地址)有效，它迫使引用只能指向初始指向的那个对象，改变它的指向会导致编译期错误。至于它所指向的对象的变化，final是不负责的。
+　　2.代码中的字符串常量在编译的过程中收集并放在class文件的常量区中，如"123"、"123"+"456"等，含有变量的表达式不会收录，如"123"+a。
+
+　　3.JVM在加载类的时候，根据常量区中的字符串生成常量池，每个字符序列如"123"会生成一个实例放在常量池里，这个实例是不在堆里的，也不会被GC，这个实例的value属性从源码的构造函数看应该是用new创建数组置入123的，所以按我的理解此时value存放的字符数组地址是在堆里。
+
+使用String不一定创建对象
+在执行到双引号包含字符串的语句时，如String a = "123"，JVM会先到常量池里查找，如果有的话返回常量池里的这个实例的引用，否则的话创建一个新实例并置入常量池里。如果是 String a = "123" + b (假设b是"456")，前半部分"123"还是走常量池的路线，但是这个+操作符其实是转换成[SringBuffer].Appad()来实现的，所以最终a得到是一个新的实例引用，而且a的value存放的是一个新申请的字符数组内存空间的地址(存放着"123456")，而此时"123456"在常量池中是未必存在的。
+
+要注意: 我们在使用诸如String str = "abc"；的格式定义类时，总是想当然地认为，创建了String类的对象str。担心陷阱！对象可能并没有被创建！而可能只是指向一个先前已经创建的对象。只有通过new()方法才能保证每次都创建一个新的对象。
+
+使用new String一定创建对象
+在执行String a = new String("123")的时候，首先走常量池的路线取到一个实例的引用，然后在堆上创建一个新的String实例，走以下构造函数给value属性赋值，然后把实例引用赋值给a。
+
+public String(String original) {
+    int size = original.count;
+    char[] originalValue = original.value;
+    char[] v;
+      if (originalValue.length > size) {
+         // The array representing the String is bigger than the new
+         // String itself.  Perhaps this constructor is being called
+         // in order to trim the baggage, so make a copy of the array.
+            int off = original.offset;
+            v = Arrays.copyOfRange(originalValue, off, off+size);
+     } else {
+         // The array representing the String is the same
+         // size as the String, so no point in making a copy.
+        v = originalValue;
+     }
+    this.offset = 0;
+    this.count = size;
+    this.value = v;
+    }
+StringBuffer与StringBuilder的区别，它们的应用场景是什么？
+当对字符串进行修改的时候，需要使用StringBuffer和StringBuilder类。
+和String类不同的是，StringBuffer和StringBuilder类的对象能够被多次的修改，并且不产生新的未使用对象。
+StringBuilder类在Java 5中被提出，它和StringBuffer之间的最大不同在于StringBuilder的方法不是线程安全的（不能同步访问）。
+由于StringBuilder相较于StringBuffer有速度优势，所以多数情况下建议使用StringBuilder类。然而在应用程序要求线程安全的情况下，则必须使用StringBuffer类。
+
+jdk的实现中StringBuffer与StringBuilder都继承自AbstractStringBuilder，对于多线程的安全与非安全看到StringBuffer中方法前面的一堆synchronized就大概了解了。
+
+这里随便讲讲AbstractStringBuilder的实现原理：我们知道使用StringBuffer等无非就是为了提高java中字符串连接的效率，因为直接使用+进行字符串连接的话，jvm会创建多个String对象，因此造成一定的开销。AbstractStringBuilder中采用一个char数组来保存需要append的字符串，char数组有一个初始大小，当append的字符串长度超过当前char数组容量时，则对char数组进行动态扩展，也即重新申请一段更大的内存空间，然后将当前char数组拷贝到新的位置，因为重新分配内存并拷贝的开销比较大，所以每次重新申请内存空间都是采用申请大于当前需要的内存空间的方式，这里是2倍。
+tringBuffer 始于 JDK 1.0
+StringBuilder 始于 JDK 1.5
+
+从 JDK 1.5 开始，带有字符串变量的连接操作（+），JVM 内部采用的是 
+StringBuilder 来实现的，而之前这个操作是采用 StringBuffer 实现的。
+正则表达式
+匹配邮箱地址的正则表达式^ [A-Za-z0-9][\w\-\.]{3,12}@([\w\-]+\.)+[\w]{2,3}$
+Java 重写(Override)与重载(Overload)
+重写(Override)
+重写是子类对父类的允许访问的方法的实现过程进行重新编写！返回值和形参都不能改变。即外壳不变，核心重写！
+重写的好处在于子类可以根据需要，定义特定于自己的行为。
+也就是说子类能够根据需要实现父类的方法。
+在面向对象原则里，重写意味着可以重写任何现有方法。实例如下：
+
+class Animal{
+
+   public void move(){
+      System.out.println("动物可以移动");
+   }
+}
+
+class Dog extends Animal{
+
+   public void move(){
+      System.out.println("狗可以跑和走");
+   }
+}
+
+public class TestDog{
+
+   public static void main(String args[]){
+      Animal a = new Animal(); // Animal 对象
+      Animal b = new Dog(); // Dog 对象
+
+      a.move();// 执行 Animal 类的方法
+
+      b.move();//执行 Dog 类的方法
+   }
+}
+以上实例编译运行结果如下：
+
+动物可以移动
+狗可以跑和走
+方法的重写规则
+参数列表必须完全与被重写方法的相同；
+返回类型必须完全与被重写方法的返回类型相同；
+访问权限不能比父类中被重写的方法的访问权限更低。例如：如果父类的一个方法被声明为public，那么在子类中重写该方法就不能声明为protected。
+父类的成员方法只能被它的子类重写。
+声明为final的方法不能被重写。
+声明为static的方法不能被重写，但是能够被再次声明。
+子类和父类在同一个包中，那么子类可以重写父类所有方法，除了声明为private和final的方法。
+子类和父类不在同一个包中，那么子类只能够重写父类的声明为public和protected的非final方法。
+重写的方法能够抛出任何非强制异常，无论被重写的方法是否抛出异常。但是，重写的方法不能抛出新的强制性异常，或者比被重写方法声明的更广泛的强制性异常，反之则可以。
+构造方法不能被重写。
+如果不能继承一个方法，则不能重写这个方法。
+--
+重载(Overload)
+重载(overloading) 是在一个类里面，方法名字相同，而参数不同。返回类型可以相同也可以不同。
+每个重载的方法（或者构造函数）都必须有一个独一无二的参数类型列表。
+只能重载构造函数。
+
+重载规则
+被重载的方法必须改变参数列表；
+被重载的方法可以改变返回类型；
+被重载的方法可以改变访问修饰符；
+被重载的方法可以声明新的或更广的检查异常；
+方法能够在同一个类中或者在一个子类中被重载。
+实例：
+
+public class Overloading {
+
+    public int test(){
+        System.out.println("test1");
+        return 1;
+    }
+
+    public void test(int a){
+        System.out.println("test2");
+    }   
+
+    //以下两个参数类型顺序不同
+    public String test(int a,String s){
+        System.out.println("test3");
+        return "returntest3";
+    }   
+
+    public String test(String s,int a){
+        System.out.println("test4");
+        return "returntest4";
+    }   
+
+    public static void main(String[] args){
+        Overloading o = new Overloading();
+        System.out.println(o.test());
+        o.test(1);
+        System.out.println(o.test(1,"test3"));
+        System.out.println(o.test("test4",1));
+    }
+}
+重写与重载之间的区别
+区别点	重载方法	重写方法
+参数列表	必须修改	一定不能修改
+返回值类型	可以修改	一定不能修改
+异常	可以修改	可以减少或删除，一定不能抛出新的或者更广的异常
+访问权限	可以修改	一定不能做更严格的限制（可以降低限制）
+Java的多态
+多态是同一个行为具有多个不同表现形式或形态的能力。
+多态性是对象多种表现形式的体现。
+
+多态存在的三个必要条件:
+
+继承
+重写
+父类引用指向子类对象
+
+以下是一个多态实例的演示，详细说明请看注释：
+
+
+public class Test {
+public static void main(String[] args) {
+  show(new Cat());  // 以 Cat 对象调用 show 方法
+  show(new Dog());  // 以 Dog 对象调用 show 方法
+
+  Animal a = new Cat();  // 向上转型  
+  a.eat();               // 调用的是 Cat 的 eat
+  Cat c = (Cat)a;        // 向下转型  
+  c.work();        // 调用的是 Cat 的 catchMouse
+}  
+
+public static void show(Animal a)  {
+  a.eat();  
+    // 类型判断
+    if (a instanceof Cat)  {  // 猫做的事情 
+        Cat c = (Cat)a;  
+        c.work();  
+    } else if (a instanceof Dog) { // 狗做的事情 
+        Dog c = (Dog)a;  
+        c.work();  
+    }  
+}  
+}
+abstract class Animal {
+abstract void eat();
+}
+
+class Cat extends Animal {
+public void eat() {
+System.out.println("吃鱼");
+}
+public void work() {
+System.out.println("抓老鼠");
+}
+}
+
+class Dog extends Animal {
+public void eat() {
+System.out.println("吃骨头");
+}
+public void work() {
+System.out.println("看家");
+}
+}
+
+
+# Java的集合框架
+
+作者： Geek_wu 
+链接：http://www.imooc.com/article/13868
+来源：慕课网
